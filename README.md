@@ -12,5 +12,5 @@ poetry install
 ## Use
 
 ```
-poetry run oa2t -f video/audio file -l zh
+poetry run oa2t -f VIDEO_OR_AUDIO_FILE -l zh
 ```
