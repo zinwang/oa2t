@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "oa2t"
+version = "0.1.0"
+description = "CLI to transcribe large audio files via OpenAI Whisper API"
+authors = ["Nah"]
+packages = [
+  { include = "oa2t", from = "./" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.13"
+openai = "^1.93.0"
+pydub = "^0.25.1"
+audioop-lts = "^0.2.1"
+black = "^25.1.0"
+
+[tool.poetry.scripts]
+oa2t = "oa2t.app:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
