@@ -7,8 +7,8 @@ from pydub import AudioSegment
 
 # ─── Configuration ────────────────────────────────────────────────────────
 openai.api_key = os.getenv("OPENAI_API_KEY")
-MODEL = "gpt-4o-transcribe"
-#MODEL = "whisper-1"
+#MODEL = "gpt-4o-transcribe"
+MODEL = "whisper-1"
 MAX_MB = 16  # maximum file size per request (in megabytes)
 
 # ─── Transcription logic ──────────────────────────────────────────────────
@@ -27,10 +27,18 @@ def transcribe_large_file(path: str, language: str | None = None) -> str:
             params["language"] = language
         return openai.audio.transcriptions.create(**params).text
 
+    transcripts = []
     # Single-request if under size limit
     if file_size <= MAX_MB * 1024 * 1024:
-        with open(path, "rb") as f:
-            return call_api(f)
+        chunk = audio[0:file_size]
+        tmp_filename = f".chunk_all.mp3"
+        chunk.export(tmp_filename, format="mp3")
+        
+        with open(tmp_filename, "rb") as f:
+            transcripts.append(call_api(f))
+        os.remove(tmp_filename)
+        return transcripts[0]
+
 
     # Calculate chunk size in ms
     bytes_per_ms = file_size / duration_ms
@@ -41,8 +49,8 @@ def transcribe_large_file(path: str, language: str | None = None) -> str:
     for start in range(0, duration_ms, max_chunk_ms):
         end = min(start + max_chunk_ms, duration_ms)
         chunk = audio[start:end]
-        tmp_filename = f".chunk_{start//1000}_{end//1000}.mp4"
-        chunk.export(tmp_filename, format="mp4")
+        tmp_filename = f".chunk_{start//1000}_{end//1000}.mp3"
+        chunk.export(tmp_filename, format="mp3")
 
         with open(tmp_filename, "rb") as f:
             transcripts.append(call_api(f))
